@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Trung Tâm Đào Tạo Lái Xe - V12.2 Final 24 Module</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1E40AF;--red:#DC2626;--green:#16A34A}
+*{box-sizing:border-box} body{font-family:Inter,system-ui,sans-serif;background:#F0F2F5;color:#050505;overscroll-behavior:none}
+input,select,textarea{font-size:16px!important;min-height:48px}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:16px}
+.btn{height:48px;border-radius:12px;font-weight:700;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-blue{background:var(--primary);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-green{background:var(--green);color:#fff}.btn-gray{background:#E4E6EB;color:#050505}
+.btn:active{transform:scale(.98)}.btn:hover{transform:scale(1.02)}
+.badge{border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}
+.badge-green{background:#DCFCE7;color:#166534}.badge-yellow{background:#FEF3C7;color:#92400E}.badge-red{background:#FEE2E2;color:#991B1B}.badge-blue{background:#DBEAFE;color:#1E40AF}
+table{width:100%;border-collapse:collapse} th{ text-align:left;font-size:13px;color:#65676B;padding:10px;border-bottom:1px solid #E4E6EB;white-space:nowrap} td{padding:10px;border-bottom:1px solid #F0F2F5;font-size:14px;vertical-align:top}
+.sidebar-link{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;font-size:14px;font-weight:600;color:#050505}
+.sidebar-link.active,.sidebar-link:hover{background:#E7F3FF;color:#1E40AF}
+@media(max-width:1023px){#sidebar{display:none}.main{margin-left:0!important;padding-bottom:90px}}
+@media(min-width:1024px){#bottomnav{display:none}}
+.gantt{height:22px;border-radius:999px;background:#E4E6EB;position:relative;overflow:hidden}.gantt>div{position:absolute;top:0;bottom:0;border-radius:999px}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.heat div{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.input-48{height:48px;font-size:16px}.xong{color:#16A34A;background:#DCFCE7;border:1px solid #16A34A}.do{color:#DC2626;background:#FEE2E2}
+</style>
+</head>
+<body>
+<!-- PC: sidebar 280px + main max 1280. Mobile: bottom nav 5 icon, main max 480px căn giữa -->
+<div class="flex">
+<aside id="sidebar" class="w-[280px] shrink-0 fixed left-0 top-0 bottom-0 bg-white border-r border-[#E4E6EB] overflow-y-auto p-4 z-20">
+<div class="flex items-center gap-3 px-2 py-2"><div class="w-11 h-11 rounded-2xl bg-[#1E40AF] text-white flex items-center justify-center text-xl font-extrabold">🚗</div><div><div class="font-extrabold leading-tight">Trung tâm Sát hạch</div><div class="text-xs text-[#65676B]">Đào tạo lái xe • Sở GTVT 2026</div></div></div>
+<div class="mt-3 px-2"><label class="text-xs font-bold text-[#65676B]">MÀU CHỦ ĐẠO</label><div id="colorPicker" class="flex gap-2 mt-2 flex-wrap"></div><input id="customColor" type="color" value="#1E40AF" class="w-full mt-2" onchange="doiMau(this.value)"></div>
+<nav id="menu" class="mt-4 space-y-1"></nav>
+<div class="mt-4 p-3 bg-[#F0F2F5] rounded-2xl text-xs leading-relaxed"><b>Kiểu 1 - Sheet riêng</b><br>Data nằm 100% trong Sheet riêng của dự án này. Không dùng chung ID cũ. Thay ID trong Code.gs rồi deploy Web App, dán URL vào Cài đặt.</div>
+</aside>
+
+<main class="main flex-1 lg:ml-[280px] mx-auto w-full max-w-[1280px] px-3 sm:px-5 py-4">
+<header class="card flex flex-wrap gap-3 items-end">
+<div class="flex-1 min-w-[220px]"><h1 class="text-xl sm:text-2xl font-extrabold">Tổng quan Sếp</h1><p id="todayLine" class="text-sm text-[#65676B]">Thứ Tư 22/10/2026 • Sẵn sàng quản lý 24 module</p><span id="modeBadge" class="badge badge-yellow">Chế độ demo khi chưa kết nối Web App</span></div>
+<div><label class="text-xs font-bold">Trung tâm Sát hạch</label><select id="fTT" class="w-full border rounded-xl px-3 bg-white" onchange="loc3Cap()"><option value="">Tất cả trung tâm</option><option value="TT01">TT01 - Hóc Môn</option><option value="TT02">TT02 - Thành Công</option></select></div>
+<div><label class="text-xs font-bold">Hệ số</label><select id="fHeSo" class="w-full border rounded-xl px-3 bg-white" onchange="loc3Cap()"><option value="">Tất cả hệ số</option><option>B1 Số tự động</option><option>B2 Số sàn</option><option>C</option><option>C1</option><option>D</option><option>BE</option><option>CE</option><option>DE</option></select></div>
+<div><label class="text-xs font-bold">Khóa</label><select id="fKhoa" class="w-full border rounded-xl px-3 bg-white" onchange="loc3Cap()"><option value="">Tất cả khóa</option><option>K51</option><option>K52</option><option>K53</option></select></div>
+<div class="flex gap-2 flex-wrap"><button class="btn btn-gray" onclick="inPDF()">🖨 In PDF</button><button class="btn btn-green" onclick="xuatExcelHienTai()">⬇ Xuất Excel</button><button class="btn btn-blue" onclick="showView('caidat')">⚙ Cài đặt</button></div>
+</header>
+
+<div id="content" class="mt-4 space-y-4"></div>
+<p class="text-center text-xs text-[#65676B] py-4">Trung tâm Đào tạo Lái xe • B1 Số tự động • B2 Số sàn • Đã có bằng - XONG • Gửi Zalo • Chuẩn Sở GTVT 2026</p>
+</main>
+</div>
+
+<nav id="bottomnav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E4E6EB] grid grid-cols-5 z-30">
+<button class="py-2 text-xs font-bold" onclick="showView('dashboard')">🏠<br>Tổng quan</button>
+<button class="py-2 text-xs font-bold" onclick="showView('LichGiaoVien')">📅<br>Lịch</button>
+<button class="py-2 text-xs font-bold" onclick="showView('HocVien')">👨‍🎓<br>Học viên</button>
+<button class="py-2 text-xs font-bold" onclick="showView('HocVienCoBang')">✅<br>Có bằng</button>
+<button class="py-2 text-xs font-bold" onclick="showView('caidat')">⚙<br>Cài đặt</button>
+</nav>
+
+<!-- Modal thêm / sửa: validation + dropdown search + date picker -->
+<div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-3 z-50" onclick="if(event.target===this)dongModal()">
+<div class="bg-white rounded-2xl w-full max-w-[520px] max-h-[90vh] overflow-y-auto p-5">
+<h3 id="modalTitle" class="text-lg font-extrabold">Thêm mới</h3><p class="text-sm text-[#65676B]">Điền đủ trường có dấu *. Ngày dùng date picker, Hệ số / Trung tâm / Khóa dùng dropdown có tìm kiếm.</p>
+<form id="modalForm" class="mt-3 space-y-3" onsubmit="return luuModal(event)"></form>
+<div class="flex gap-2 mt-4"><button class="btn btn-blue flex-1" onclick="document.getElementById('modalForm').requestSubmit()">💾 Lưu</button><button class="btn btn-gray" onclick="dongModal()">Đóng</button><button id="btnXoaModal" class="btn btn-red hidden" onclick="xoaModal()">🗑 Xóa</button></div>
+</div></div>
+<div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 bg-[#050505] text-white px-4 py-3 rounded-2xl text-sm font-bold hidden z-[60]"></div>
+
+<script>
+const PRIMARY_PRESETS=['#1E40AF','#166534','#BE185D','#0F172A','#B45309'];
+let WEBAPP_URL=localStorage.getItem('ttlx_webapp_url')||'';
+let CURRENT_VIEW='dashboard'; let CURRENT_SHEET=''; let CURRENT_ROWS=[]; let CURRENT_HEADERS=[]; let EDIT_ROW=null;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3500)}
+function doiMau(c){document.documentElement.style.setProperty('--primary',c);localStorage.setItem('ttlx_color',c);document.querySelectorAll('.btn-blue').forEach(b=>b.style.background=c)}
+function renderColorPicker(){const w=document.getElementById('colorPicker');w.innerHTML=PRIMARY_PRESETS.map(c=>`<button onclick="doiMau('${c}')" class="w-9 h-9 rounded-full border-2 border-white shadow" style="background:${c}" title="${c}"></button>`).join('');const saved=localStorage.getItem('ttlx_color');if(saved)doiMau(saved)}
+const MODULES=[
+['dashboard','🏠 Tổng quan Sếp'],['TrungTamSatHach','🏢 Trung tâm Sát hạch'],['KhoaHoc','📚 Khóa học (Hệ số + Mã TT)'],['HocVien','👨‍🎓 Học viên (XONG màu xanh)'],['HoSoDauVao','📄 Hồ sơ'],['KiemTraDieuKien','✅ Kiểm tra ĐK'],['BienDongHV','🔄 Biến động'],['HopDong','📝 Hợp đồng'],['HocMoPhong','🕹 Mô phỏng Cabin'],['GiaoVien','👨‍🏫 Giáo viên'],['GiayPhepGV','🪪 Giấy phép GV'],['LichGiaoVien','📅 Lịch GV'],['XeTapLai','🚗 Xe'],['NienHanXe','⏳ Niên hạn xe'],['LichTheoKhoa','🗓 Lịch theo khóa'],['LichChayDAT','🛣 Lịch DAT'],['TongHopDAT','📊 Tổng hợp DAT'],['KyThi','🎯 Kỳ thi'],['KetQuaThi','🏆 Kết quả thi'],['HocVienCoBang','✅ HV Có Bằng (XONG)'],['HoaDon','💰 Hóa đơn'],['luongchiphi','💵 Lương + Chi phí'],['baocao','📈 Báo cáo'],['tatcasheet','🗂 Tất cả 26 Sheet'],['caidat','⚙ Cài đặt']
+];
+const SHEET_HEADERS={
+TrungTamSatHach:['MaTT','TenTT','DiaChi','SDT','NguoiLienHe','SoLuongSan','TrangThai','PhanTramAnChia','GhiChu'],
+KhoaHoc:['MaKhoa','TenKhoa','HeSo','MaTT_SatHach','TenTT_SatHach','NgayKhaiGiang','NgayBeGiang','SoHV','GVChuNhiem','TrangThai'],
+HocVien:['MaHV','TenHV','SDT','NgaySinh','MaKhoa','HeSo','MaTT_SatHach','TenTT_SatHach','NgayDangKy','TrangThaiHoc','CoBang','TienDoDAT'],
+HoSoDauVao:['MaHV','CCCD','NgayNopCCCD','KhamSucKhoe','NgayKham','Anh3x4','DonDeNghi','LyLich','GhiChu','HanBoSung'],
+KiemTraDieuKien:['MaHV','NgaySinh','Tuoi','HeSoDK','BangCu','SoNamCoBang','SoKMAnToan','DuDK','LyDo'],
+BienDongHV:['MaBD','MaHV','Loai','Ngay','LyDo','SoTienHoan','MaKhoaMoi','MaTT_Moi','TrangThai','NgayDuyet'],
+HopDong:['MaHDong','MaHV','NgayKy','TongTienCamKet','CamKetTyLeDo','DieuKhoan','FilePDFLink','ChuKySo','NgayKySo','TrangThai'],
+HocMoPhong:['MaHV','TenHV','HeSo','GioCabinCan','DaHocGio','ConLaiGio','DiemMoPhong','LoaiCabin','TrangThai','HanHoanThanh'],
+GiaoVien:['MaGV','TenGV','SDT','HangDay','LuongTheoGio','LuongTheoKM','TrangThai'],
+GiayPhepGV:['MaGV','SoGiayPhep','NgayCap','Han','SoHVDangDay','GioiHan','TrangThai'],
+LichGiaoVien:['MaLich','MaGV','Ngay','GioBD','GioKT','MaHV','BienSo','LoaiLich','DiaDiem','TrangThai'],
+XeTapLai:['BienSo','LoaiXe','Hang','TrangThai'],
+NienHanXe:['BienSo','NamSX','NienHan','SoNamDaDung','KMHienTai','KMBaoDuongGanNhat','CanhBaoKM','TrangThai','ChiPhiDuTinh'],
+LichTheoKhoa:['MaLichKhoa','MaKhoa','Ngay','Buoi','GioBD','GioKT','MonHoc','DiaDiem','GiaoVien','LoaiLich','GhiChu'],
+LichChayDAT:['MaPhien','MaHV','MaGV','BienSo','NgayChay','GioBD','GioKT','QuangDuongKM','SoGio','LoaiDuong','GPS_BatDau','GPS_KetThuc','TrangThaiDAT'],
+TongHopDAT:['MaHV','TenHV','HeSo','TongKMCan','DaChayKM','ConLaiKM','TongGioCan','DaChayGio','DuDKThi','PhanTramHoanThanh','TrangThai'],
+KyThi:['MaKyThi','MaKhoa','HeSo','MaTT_SatHach','NgayThi','LoaiThi','DiaDiemThi','SoLuongThi','GhiChu'],
+KetQuaThi:['MaHV','TenHV','MaKhoa','HeSo','MaTT_SatHach','DiemLyThuyet','DiemMoPhong','DiemSaHinh','DiemDuongTruong','KetQua','NgayThi','NgayCoBang','SoBang','TrangThaiBang','CoBang','GhiChu'],
+HocVienCoBang:['MaHV','TenHV','HeSo','MaTT_SatHach','TenTT','NgayThi','NgayCoBang','SoBang','SoThangCoBang','NhomZalo','DaGuiZalo','NgayGuiZalo','TrangThai'],
+HoaDon:['MaHD','MaHV','TenHV','TongTien','DaThu','ConLai','TrangThai'],
+ChiTietThu:['MaPhieuThu','MaHD','NgayThu','SoTien','PhuongThuc','NguoiThu','ConLaiSauThu','GhiChu'],
+BangLuongGV:['MaGV','TenGV','Thang','SoGioDay','SoKMDAT','LuongTheoGio','LuongTheoKM','TongLuong','DaThanhToan','ConLai'],
+ChiPhi:['Ngay','LoaiChi','SoTien','BienSo','MaGV','GhiChu'],
+ChiPhiLienKet:['Ngay','MaTT_SatHach','TenTT','SoHV','SoTienTra','PhanTram','GhiChu','TrangThai'],
+PhanQuyen:['Email','VaiTro','MaKhoaQuanLy','MaTTQuanLy','TrangThai'],
+LichSu:['ThoiGian','HanhDong','MaDoiTuong','NguoiLam','ChiTiet'],
+CauHinh:['TenTrungTam','Logo','MauChuDao','DiaChi','SDT','ZaloOAToken']
+};
+</script>
+<script>
+// ===== Demo fallback (đúng số liệu mẫu trong bản V12.2, chỉ dùng khi chưa kết nối Web App) =====
+const DEMO={
+TrungTamSatHach:[{MaTT:'TT01',TenTT:'Trung tâm Sát hạch Hóc Môn',DiaChi:'Hóc Môn, TP.HCM',SDT:'0900000001',NguoiLienHe:'Quản lý TT01',SoLuongSan:4,TrangThai:'DangHopTac',PhanTramAnChia:30,GhiChu:'Demo K51'},{MaTT:'TT02',TenTT:'Trung tâm Sát hạch Thành Công',DiaChi:'Thành Công, TP.HCM',SDT:'0900000002',NguoiLienHe:'Quản lý TT02',SoLuongSan:3,TrangThai:'DangHopTac',PhanTramAnChia:30,GhiChu:''}],
+KhoaHoc:[{MaKhoa:'K51',TenKhoa:'Khóa K51 - B2',HeSo:'B2 Số sàn',MaTT_SatHach:'TT01',TenTT_SatHach:'Trung tâm Sát hạch Hóc Môn',NgayKhaiGiang:'10/10/2026',NgayBeGiang:'10/02/2027',SoHV:120,GVChuNhiem:'Thầy Hùng',TrangThai:'DangHoc'},{MaKhoa:'K52',TenKhoa:'Khóa K52 - B1',HeSo:'B1 Số tự động',MaTT_SatHach:'TT01',TenTT_SatHach:'Trung tâm Sát hạch Hóc Môn',NgayKhaiGiang:'10/11/2026',NgayBeGiang:'10/02/2027',SoHV:80,GVChuNhiem:'Thầy Minh Anh',TrangThai:'DangHoc'},{MaKhoa:'K53',TenKhoa:'Khóa K53 - C',HeSo:'C',MaTT_SatHach:'TT02',TenTT_SatHach:'Trung tâm Sát hạch Thành Công',NgayKhaiGiang:'10/12/2026',NgayBeGiang:'10/02/2027',SoHV:80,GVChuNhiem:'Thầy Hùng',TrangThai:'DangHoc'}],
+HocVien:[{MaHV:'HV2026-001',TenHV:'Nguyễn Văn An',SDT:'0903000001',NgaySinh:'01/01/2000',MaKhoa:'K51',HeSo:'B2 Số sàn',MaTT_SatHach:'TT01',TenTT_SatHach:'Trung tâm Sát hạch Hóc Môn',NgayDangKy:'01/10/2026',TrangThaiHoc:'Dang hoc DAT',CoBang:'❌',TienDoDAT:85},{MaHV:'HV-1024',TenHV:'Trần Thị Bình',SDT:'0903000002',NgaySinh:'01/01/2002',MaKhoa:'K51',HeSo:'B2 Số sàn',MaTT_SatHach:'TT01',TenTT_SatHach:'Trung tâm Sát hạch Hóc Môn',NgayDangKy:'01/10/2026',TrangThaiHoc:'Dang hoc DAT',CoBang:'❌',TienDoDAT:70},{MaHV:'HV-1135',TenHV:'Lê Văn Cường',SDT:'0903000003',NgaySinh:'01/01/1998',MaKhoa:'K51',HeSo:'B2 Số sàn',MaTT_SatHach:'TT01',TenTT_SatHach:'Trung tâm Sát hạch Hóc Môn',NgayDangKy:'01/10/2026',TrangThaiHoc:'Dang hoc DAT',CoBang:'❌',TienDoDAT:65},{MaHV:'HV-1198',TenHV:'Phạm Thị Dung',SDT:'0903000004',NgaySinh:'01/01/2001',MaKhoa:'K52',HeSo:'B1 Số tự động',MaTT_SatHach:'TT01',TenTT_SatHach:'Trung tâm Sát hạch Hóc Môn',NgayDangKy:'01/11/2026',TrangThaiHoc:'Dang hoc ly thuyet',CoBang:'❌',TienDoDAT:40}],
+HocVienCoBang:[{MaHV:'HV001',TenHV:'Nguyễn Văn A',HeSo:'B2 Sàn',MaTT_SatHach:'TT01',TenTT:'Hóc Môn',NgayThi:'05/01/2027',NgayCoBang:'10/01/2027',SoBang:'B2-123456',SoThangCoBang:'Moi co <1 thang',NhomZalo:'Nhom Co Bang B2 - T01/27',DaGuiZalo:'Da gui',NgayGuiZalo:'10/01/2027',TrangThai:'XONG - Da co bang'},{MaHV:'HV2026-090',TenHV:'Nguyễn Văn Có Bằng',HeSo:'B2 Số sàn',MaTT_SatHach:'TT01',TenTT:'Trung tâm Sát hạch Hóc Môn',NgayThi:'20/09/2026',NgayCoBang:'10/10/2026',SoBang:'B2-123456',SoThangCoBang:'Moi co <1 thang',NhomZalo:'Nhom Co Bang B2 Số sàn - T10/26',DaGuiZalo:'Chua gui',NgayGuiZalo:'',TrangThai:'XONG - Da co bang'}],
+KetQuaThi:[{MaHV:'HV2026-001',TenHV:'Nguyễn Văn An',MaKhoa:'K51',HeSo:'B2 Số sàn',MaTT_SatHach:'TT01',DiemLyThuyet:28,DiemMoPhong:42,DiemSaHinh:95,DiemDuongTruong:92,KetQua:'Do',NgayThi:'25/10/2026',NgayCoBang:'',SoBang:'',TrangThaiBang:'Chua co',CoBang:'CHUA XONG ❌',GhiChu:''}],
+HoaDon:[{MaHD:'HD001',MaHV:'HV2026-001',TenHV:'Nguyễn Văn An',TongTien:20000000,DaThu:15000000,ConLai:5000000,TrangThai:'Con no'}],
+canhBao:[
+{loai:'Mô phỏng Cabin',noiDung:'Mô Phỏng Cabin 120h — 102/120h (85%) — thiếu 18h — hạn 20/01 — Chưa đạt, CẤM chạy DAT'},
+{loai:'Kiểm tra ĐK',noiDung:'Kiểm tra ĐK — 07 HV chờ xác minh, 03 quá tuổi'},
+{loai:'Giấy phép GV',noiDung:'Giấy phép GV — 12/10 (120%) — vượt 2 HV — Tạm dừng nhận mới'},
+{loai:'Niên hạn xe',noiDung:'Niên hạn xe — Xe #DL-5102: 15 năm 3 tháng vận hành — Quá niên hạn 3 tháng — Cần bảo dưỡng định kỳ 5.000km — Chi phí 12.500.000đ'},
+{loai:'Biến động',noiDung:'Biến động — 09 trường hợp: Nghỉ 4, Bảo lưu 3, Hoàn tiền 2 — 8.500.000đ — cần duyệt trước 10/01'},
+{loai:'Hợp đồng',noiDung:'Hợp đồng chưa ký — 05/32 — 5 quá hạn >48h'}
+]
+};
+async function callApi(action,payload){
+  if(!WEBAPP_URL) return null;
+  try{const r=await fetch(WEBAPP_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,payload:payload||{}})});const j=await r.json();return j.ok===false?null:j}catch(e){return null}
+}
+function vnd(n){return Number(n||0).toLocaleString('vi-VN')+'đ'}
+function badgeTrangThai(v){
+  const s=String(v||'');
+  if(s.includes('XONG')||s.includes('✅')||s.includes('Da co bang'))return '<span class="badge badge-green">'+s+'</span>';
+  if(s.includes('Truot')||s.includes('Qua')||s.includes('Cam')||s.includes('Vuot')||s.includes('Het han'))return '<span class="badge badge-red">'+s+'</span>';
+  if(s.includes('Dang hoc')||s.includes('Cho'))return '<span class="badge badge-yellow">'+s+'</span>';
+  return '<span class="badge badge-blue">'+s+'</span>';
+}
+function loc3Cap(){
+  const tt=document.getElementById('fTT').value, hs=document.getElementById('fHeSo').value, kh=document.getElementById('fKhoa').value;
+  if(CURRENT_VIEW==='dashboard'||CURRENT_VIEW==='HocVienCoBang'){showView(CURRENT_VIEW);return}
+  if(CURRENT_SHEET){const rows=CURRENT_ROWS.filter(r=> (!tt||r.MaTT_SatHach===tt) && (!hs||r.HeSo===hs) && (!kh||r.MaKhoa===kh)); renderBang(CURRENT_SHEET,rows)}
+}
+function renderMenu(){
+  document.getElementById('menu').innerHTML=MODULES.map(m=>`<button class="sidebar-link w-full text-left ${CURRENT_VIEW===m[0]?'active':''}" onclick="showView('${m[0]}')">${m[1]}</button>`).join('');
+}
+async function showView(view){
+  CURRENT_VIEW=view; renderMenu();
+  const c=document.getElementById('content');
+  document.querySelector('h1').textContent = MODULES.find(m=>m[0]===view)?.[1].replace(/^[^\s]+\s/,'') || view;
+  if(view==='dashboard') return renderDashboard();
+  if(view==='caidat') return renderCaiDat();
+  if(view==='baocao') return renderBaoCao();
+  if(view==='tatcasheet') return renderTatCaSheet();
+  if(view==='luongchiphi') return renderLuongChiPhi();
+  // Các module còn lại đều là 1 sheet
+  const sheet=view; CURRENT_SHEET=sheet;
+  const api=await callApi('getSheet',{sheet});
+  const rows=api?api.rows:(DEMO[sheet]||[]);
+  CURRENT_ROWS=rows; CURRENT_HEADERS=SHEET_HEADERS[sheet]||Object.keys(rows[0]||{});
+  if(api) document.getElementById('modeBadge').textContent='Đã kết nối Web App';
+  renderBang(sheet,rows,view==='HocVienCoBang');
+}
+function renderDashboard(){
+  const c=document.getElementById('content');
+  // Số liệu mẫu V12.2 hiển thị khi demo; khi có API sẽ thay bằng số thật (xem renderDashboardThuc)
+  callApi('getDashboardFinal').then(d=>{
+    if(d) renderDashboardThuc(d); else renderDashboardDemo();
+  });
+  renderDashboardDemo();
+}
+function renderDashboardDemo(){
+  const c=document.getElementById('content');
+  c.innerHTML=`
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+    <div class="card"><div class="text-sm text-[#65676B]">Khóa đang học</div><div class="text-2xl font-extrabold">3 khóa</div><div class="text-sm font-bold text-[#1E40AF]">K51 • K52 • K53</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Học viên</div><div class="text-2xl font-extrabold">280 <span class="text-sm text-[#16A34A]">▲ 12</span></div><div class="text-sm">Đang học + đã có bằng</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Giáo viên</div><div class="text-2xl font-extrabold">12</div><div class="text-sm">Hoạt động 10 • Nghỉ 2</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Xe</div><div class="text-2xl font-extrabold">18</div><div class="text-sm">Sẵn sàng 16 • Bảo trì 2</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Lịch hôm nay</div><div class="text-2xl font-extrabold">45</div><div class="text-sm">Lý thuyết 18 • Thực hành 27</div></div>
+  </div>
+  <div class="card"><h3 class="font-extrabold">📊 HV Có Bằng — Tổng HV đã có bằng: 156/280 (55%)</h3>
+    <p class="text-sm mt-1">B1 45 • B2 89 • C 22 — Mới có &lt;1 tháng: 25 HV (Gửi Zalo chúc mừng + Xin đánh giá) • Có bằng 1-3 tháng: 40 HV (Gửi Zalo giới thiệu) • Có bằng &gt;6 tháng: 91 HV (Nhắc nâng hạng)</p>
+    <div class="mt-3 flex items-center gap-4 flex-wrap"><div style="width:110px;height:110px;border-radius:50%;background:conic-gradient(#16A34A 0 55%, #FBBF24 55% 85%, #DC2626 85% 100%)"></div><div class="text-sm leading-relaxed"><span class="text-[#16A34A] font-bold">■ Có bằng 55%</span> • <span class="text-[#B45309] font-bold">■ Chưa có 30%</span> • <span class="text-[#DC2626] font-bold">■ Trượt 15%</span><br>Top GV tỷ lệ đỗ cao nhất: <b>Thầy Hùng 95%</b></div></div>
+    <div class="mt-3"><div class="text-sm font-bold mb-1">Biểu đồ cột theo tháng có bằng</div><div class="flex items-end gap-2 h-24">${[30,45,38,52,41,60].map((v,i)=>`<div class="flex-1 bg-[#1E40AF] rounded-t-xl text-white text-center text-xs pt-1" style="height:${v}%">${v}</div>`).join('')}</div><div class="flex gap-2 text-xs text-[#65676B] mt-1">${['T05','T06','T07','T08','T09','T10'].map(x=>`<div class="flex-1 text-center">${x}</div>`).join('')}</div></div>
+    <div class="mt-3 flex gap-2 flex-wrap"><button class="btn btn-green" onclick="showView('HocVienCoBang')">Xem HV Có Bằng</button><button class="btn btn-blue" onclick="guiZaloNhanh()">💬 Gửi Zalo chúc mừng</button></div></div>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="card"><h3 class="font-extrabold">🗓 Gantt lộ trình khóa</h3><div class="mt-3 space-y-3 text-sm"><div>K51 <div class="gantt"><div style="left:0;width:100%;background:#1E40AF"></div></div><div class="flex justify-between text-xs text-[#65676B]"><span>10/2026</span><span>02/2027</span></div></div><div>K52 <div class="gantt"><div style="left:25%;width:72%;background:#16A34A"></div></div></div><div>K53 <div class="gantt"><div style="left:50%;width:35%;background:#B45309"></div></div></div></div><p class="text-sm mt-2">Tiến độ khóa: K51 100% • K52 72% • K53 35%</p></div>
+    <div class="card"><h3 class="font-extrabold">🔥 Calendar Heatmap thực hành — Oct 2026</h3><div class="heat mt-3">${Array.from({length:28},(_,i)=>`<div style="background:${i%5===0?'#1E40AF':i%3===0?'#93C5FD':'#E4E6EB'};color:${i%5===0?'#fff':'#050505'}">${i+1}</div>`).join('')}</div><p class="text-sm mt-2">Màu đậm = nhiều ca thực hành trong ngày.</p></div>
+  </div>
+  <div class="card"><h3 class="font-extrabold">📋 Bảng chi tiết lịch hoạt động</h3><div class="overflow-x-auto mt-2"><table><tr><th>Ngày</th><th>Khóa</th><th>Số ca DAT</th><th>Số ca Thực hành</th><th>Số ca Thi</th><th>Giáo viên trực</th><th>Cảnh báo</th></tr><tr><td>22/10/2026</td><td>K51</td><td>12</td><td>20</td><td>3</td><td>Thầy Hùng, Thầy Minh Anh</td><td><span class="badge badge-red">3 HV thiếu DAT</span></td></tr><tr><td>22/10/2026</td><td>K52</td><td>8</td><td>7</td><td>0</td><td>Thầy Minh Anh</td><td><span class="badge badge-red">Trùng lịch</span></td></tr></table></div></div>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="card !border-2 !border-[#DC2626]"><h3 class="font-extrabold text-[#DC2626]">⚠ 3 HV sắp thi thiếu DAT</h3><p class="text-sm mt-1">HV-1024, HV-1135, HV-1198 — Hạn 25/10 — Cần hoàn tất DAT trước 25/10</p></div>
+    <div class="card !border-2 !border-[#F59E0B]"><h3 class="font-extrabold text-[#92400E]">⚠ 2 GV trùng lịch</h3><p class="text-sm mt-1">Thầy Minh Anh — trùng ca 09:00 &amp; 14:00 ngày 22/10</p></div>
+  </div>
+  <div class="lg:hidden card"><h3 class="font-extrabold">Tổng quan hôm nay — Thứ Tư 22/10/2026</h3><p class="text-sm mt-1">45 lịch • 65% hoàn thành (29/45) • Cảnh báo: 3 HV thiếu DAT, 2 GV trùng lịch</p></div>
+  <div id="warnCards"></div>`;
+  renderCanhBaoCards(DEMO.canhBao);
+}
+function renderDashboardThuc(d){
+  const c=document.getElementById('content'); const k=d.kpi||{};
+  // Giữ bố cục demo nhưng thay KPI thật vào đầu trang nếu có
+  const first=c.querySelector('.grid'); if(first){ first.innerHTML=`
+    <div class="card"><div class="text-sm text-[#65676B]">Khóa đang học</div><div class="text-2xl font-extrabold">${(k.khoaDangHoc||[]).join(' • ')||'—'}</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Học viên</div><div class="text-2xl font-extrabold">${k.tongHV||0}</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Giáo viên</div><div class="text-2xl font-extrabold">${k.tongGVHoatDong||0}</div><div class="text-sm">Nghỉ ${k.tongGVNghi||0}</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Xe sẵn sàng</div><div class="text-2xl font-extrabold">${k.xeSanSang||0}</div><div class="text-sm">Bảo trì ${k.xeBaoTri||0}</div></div>
+    <div class="card"><div class="text-sm text-[#65676B]">Lịch hôm nay</div><div class="text-2xl font-extrabold">${k.lichHomNay||0}</div><div class="text-sm">Lý thuyết ${k.lyThuyet||0} • Thực hành ${k.thucHanh||0}</div></div>`; }
+  document.getElementById('modeBadge').textContent='Đã kết nối Web App — số liệu thật từ Sheet';
+  if(d.canhBao) renderCanhBaoCards(d.canhBao);
+}
+function renderCanhBaoCards(list){
+  const w=document.getElementById('warnCards'); if(!w) return;
+  w.innerHTML=`<h3 class="font-extrabold mt-2">🚨 6 mô-đun cảnh báo đỏ</h3><div class="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">`+list.slice(0,6).map(x=>`<div class="card !border-2 !border-[#DC2626]"><div class="font-bold text-[#DC2626]">${x.loai||''}</div><div class="text-sm mt-1">${x.noiDung||''}</div></div>`).join('')+`</div>`;
+}
+</script>
+<script>
+function renderBang(sheet,rows,isCoBang){
+  const c=document.getElementById('content');
+  const headers=SHEET_HEADERS[sheet]||Object.keys(rows[0]||{});
+  const title=MODULES.find(m=>m[0]===sheet)?.[1]||sheet;
+  const filterCoBang = isCoBang?`<div class="flex gap-2 flex-wrap mt-3">
+    <select id="fCBHeSo" class="border rounded-xl px-3 bg-white" onchange="locCoBang()"><option value="">Tất cả hệ số</option><option>B1 Số tự động</option><option>B2 Số sàn</option><option>C</option></select>
+    <select id="fCBTT" class="border rounded-xl px-3 bg-white" onchange="locCoBang()"><option value="">Tất cả TT</option><option>TT01</option><option>TT02</option></select>
+    <select id="fCBGui" class="border rounded-xl px-3 bg-white" onchange="locCoBang()"><option value="">Tất cả trạng thái Zalo</option><option value="Chua gui">Chưa gửi</option><option value="Da gui">Đã gửi</option></select>
+    <input id="fCBNgay" type="date" class="border rounded-xl px-3 bg-white" onchange="locCoBang()">
+    <button class="btn btn-green" onclick="guiZaloNhanh()">💬 Gửi lại Zalo</button>
+    <button class="btn btn-gray" onclick="xuatExcelHienTai()">⬇ Xuất Excel DS có bằng</button></div>`:``;
+  const btnCoBang = sheet==='KetQuaThi' ? `<button class="btn btn-green" onclick="capNhatCoBangUI()">✅ Cập nhật Có Bằng + Gửi Zalo</button>` : (sheet==='HocVienCoBang' ? `<button class="btn btn-green" onclick="capNhatCoBangUI()">✅ Cập nhật Có Bằng + Gửi Zalo</button>` : '');
+  c.innerHTML=`<div class="card"><div class="flex flex-wrap gap-2 items-center justify-between"><h3 class="font-extrabold text-lg">${title}</h3><div class="flex gap-2 flex-wrap">${btnCoBang}<button class="btn btn-blue" onclick="moModal()">+ Thêm mới</button><button class="btn btn-gray" onclick="showView('${sheet}')">↻ Tải lại</button></div></div>
+  <div class="flex gap-2 mt-3 flex-wrap"><input id="searchBox" placeholder="🔍 Tìm kiếm..." class="flex-1 min-w-[200px] border rounded-xl px-3 bg-white" oninput="timKiemBang()"><select id="sortBox" class="border rounded-xl px-3 bg-white" onchange="sapXepBang()"><option value="">Sắp xếp...</option>${headers.map(h=>`<option>${h}</option>`).join('')}</select></div>${filterCoBang}
+  <div class="overflow-x-auto mt-3"><table id="bangChinh"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}<th>Thao tác</th></tr></thead><tbody id="bangBody"></tbody></table></div>
+  <p class="text-sm text-[#65676B] mt-2">Tổng: <span id="tongDong">${rows.length}</span> dòng • Bấm vào 1 dòng để sửa. Nút Xóa có confirm. Trạng thái XONG hiển thị xanh lá.</p></div>`;
+  CURRENT_ROWS=rows; CURRENT_HEADERS=headers;
+  veBang(rows);
+}
+function veBang(rows){
+  const b=document.getElementById('bangBody'); if(!b) return;
+  b.innerHTML=rows.map((r,idx)=>{
+    const origIdx=CURRENT_ROWS.indexOf(r);
+    return `<tr class="hover:bg-[#F0F2F5] cursor-pointer" onclick="moModal(${origIdx})">${CURRENT_HEADERS.map(h=>{
+      const val=r[h]??''; const s=String(val);
+      if(h==='TrangThaiHoc'||h==='TrangThai'||h==='CoBang'||h==='KetQua'||h==='TrangThaiBang') return `<td>${badgeTrangThai(s)}</td>`;
+      if(h==='DaGuiZalo') return `<td>${s==='Da gui'?'<span class="badge badge-green">Đã gửi</span>':'<span class="badge badge-red">Chưa gửi</span>'}</td>`;
+      return `<td>${s}</td>`;
+    }).join('')}<td><button class="btn btn-gray !h-9 !px-3" onclick="event.stopPropagation();moModal(${origIdx})">Sửa</button> <button class="btn btn-red !h-9 !px-3" onclick="event.stopPropagation();xoaDong(${origIdx})">Xóa</button></td></tr>`;
+  }).join('') || `<tr><td colspan="${CURRENT_HEADERS.length+1}" class="text-center text-[#65676B]">Chưa có dữ liệu. Bấm + Thêm mới hoặc chạy initSheets trong Apps Script.</td></tr>`;
+  const td=document.getElementById('tongDong'); if(td) td.textContent=rows.length;
+}
+function timKiemBang(){const q=(document.getElementById('searchBox').value||'').toLowerCase();veBang(CURRENT_ROWS.filter(r=>Object.values(r).join(' ').toLowerCase().includes(q)))}
+function sapXepBang(){const k=document.getElementById('sortBox').value;if(!k)return;const rows=[...CURRENT_ROWS].sort((a,b)=>String(a[k]??'').localeCompare(String(b[k]??'')));veBang(rows)}
+function locCoBang(){
+  const hs=document.getElementById('fCBHeSo').value, tt=document.getElementById('fCBTT').value, g=document.getElementById('fCBGui').value;
+  veBang(CURRENT_ROWS.filter(r=>(!hs||r.HeSo===hs)&&(!tt||r.MaTT_SatHach===tt)&&(!g||r.DaGuiZalo===g)));
+}
+async function renderTatCaSheet(){
+  const c=document.getElementById('content');
+  const names=Object.keys(SHEET_HEADERS);
+  const api=await callApi('getAllSheets');
+  const counts={}; if(api&&api.sheets) Object.keys(api.sheets).forEach(k=>counts[k]=(api.sheets[k]||[]).length);
+  c.innerHTML=`<div class="card"><h3 class="font-extrabold text-lg">🗂 Tất cả 26 nhóm Sheet (27 sheet vật lý: LichSu + CauHinh tách riêng)</h3><p class="text-sm text-[#65676B] mt-1">Bấm 1 sheet để mở bảng, thêm / sửa / xóa. Các sheet ChiTietThu, BangLuongGV, ChiPhi, ChiPhiLienKet, PhanQuyen, LichSu, CauHinh nằm ở đây, không bị thiếu.</p><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-4">${names.map(n=>`<button class="text-left p-3 rounded-2xl bg-[#F0F2F5] hover:bg-[#E7F3FF]" onclick="showView('${n}')"><b>${n}</b><div class="text-xs text-[#65676B]">${(SHEET_HEADERS[n]||[]).join(' • ')}${counts[n]!==undefined?` — ${counts[n]} dòng`:''}</div></button>`).join('')}</div></div>`;
+}
+async function renderBaoCao(){
+  const c=document.getElementById('content');
+  const api=await callApi('checkAllCanhBao');
+  const list=api?api.canhBao:DEMO.canhBao;
+  c.innerHTML=`<div class="card"><h3 class="font-extrabold text-lg">📈 Báo cáo — Cảnh báo tự động (12 loại)</h3><p class="text-sm text-[#65676B]">Chạy từ Code.gs checkAllCanhBao(). Khi chưa kết nối, hiển thị số liệu mẫu V12.2.</p><div class="mt-3 space-y-2">${list.map(x=>`<div class="p-3 rounded-2xl bg-[#FEF2F2] border border-[#FECACA] text-sm"><b>${x.loai}:</b> ${x.noiDung}</div>`).join('')}</div><div class="flex gap-2 mt-4 flex-wrap"><button class="btn btn-blue" onclick="inPDF()">🖨 In PDF Báo cáo Sở</button><button class="btn btn-green" onclick="xuatExcelHienTai()">⬇ Xuất Excel Báo cáo Sở</button></div></div>`;
+}
+async function renderLuongChiPhi(){
+  const c=document.getElementById('content');
+  const api=await callApi('getThuChi');
+  if(!api){c.innerHTML=`<div class="card"><h3 class="font-extrabold">💵 Lương + Chi phí (demo)</h3><p class="text-sm mt-1">Bảng lương GV mẫu: Thầy Hùng — 80h × 200k = 16.000.000đ + 500km × 5k = 2.500.000đ = <b>18.500.000đ</b></p><p class="text-sm mt-1">Chi phí liên kết mẫu: TT01 — 120 HV × 20tr × 30% = <b>72.000.000đ</b></p><p class="text-sm text-[#65676B] mt-2">Kết nối Web App để xem Bảng lương, Chi phí, Chi phí liên kết thật từ Sheet.</p><button class="btn btn-blue mt-3" onclick="showView('HoaDon')">Xem Hóa đơn</button></div>`;return}
+  const t=api.tong||{};
+  c.innerHTML=`<div class="grid md:grid-cols-3 gap-3"><div class="card"><div class="text-sm">Tổng thu</div><div class="text-xl font-extrabold">${vnd(t.daThu)}</div></div><div class="card"><div class="text-sm">Còn nợ</div><div class="text-xl font-extrabold text-[#DC2626]">${vnd(t.conLai)}</div></div><div class="card"><div class="text-sm">Chi phí liên kết</div><div class="text-xl font-extrabold">${vnd(t.lienKet)}</div></div></div>
+  <div class="card mt-4"><h3 class="font-extrabold">Hóa đơn</h3><div class="overflow-x-auto"><table><tr><th>Mã HD</th><th>Học viên</th><th>Tổng</th><th>Đã thu</th><th>Còn lại</th><th>Trạng thái</th></tr>${(api.hoaDon||[]).map(r=>`<tr><td>${r.MaHD}</td><td>${r.TenHV}</td><td>${vnd(r.TongTien)}</td><td>${vnd(r.DaThu)}</td><td>${vnd(r.ConLai)}</td><td>${badgeTrangThai(r.TrangThai)}</td></tr>`).join('')}</table></div></div>`;
+}
+function renderCaiDat(){
+  const c=document.getElementById('content');
+  c.innerHTML=`<div class="card max-w-[720px]"><h3 class="font-extrabold text-lg">⚙ Cài đặt — Kết nối Sheet riêng</h3>
+  <label class="text-sm font-bold block mt-4">Web App URL (sau khi Deploy Apps Script)</label><input id="inpWebApp" value="${WEBAPP_URL}" placeholder="https://script.google.com/macros/s/.../exec" class="w-full border rounded-xl px-3 bg-white mt-1">
+  <p class="text-sm text-[#65676B] mt-1">Sheet ID riêng nằm trong Code.gs (const SHEET_ID). Không dán ID cũ, không chia sẻ ID này sang chat khác.</p>
+  <label class="text-sm font-bold block mt-4">Màu chủ đạo</label><div class="flex gap-2 mt-2 flex-wrap">${PRIMARY_PRESETS.map(col=>`<button onclick="doiMau('${col}')" class="w-10 h-10 rounded-full" style="background:${col}"></button>`).join('')}<input type="color" value="#1E40AF" onchange="doiMau(this.value)"></div>
+  <div class="flex gap-2 mt-5 flex-wrap"><button class="btn btn-blue" onclick="luuCaiDat()">💾 Lưu Cài đặt</button><button class="btn btn-green" onclick="khoiTaoSheet()">▶ Khởi tạo 26 sheet (initSheets)</button><button class="btn btn-gray" onclick="backupNgay()">💾 Backup ngay (2h sáng tự động)</button></div>
+  <div class="mt-5 text-sm leading-relaxed bg-[#F0F2F5] rounded-2xl p-4"><b>Hướng dẫn triển khai (tóm tắt):</b><br>1) Tạo Sheet mới, copy ID riêng.<br>2) Dán ID thật vào Code.gs, thay '1ABC...XYZ_ID_SHEET_MOI_CUA_MAY'.<br>3) script.google.com → dán Code.gs + index.html → chạy initSheets() 1 lần.<br>4) Deploy Web App (Anyone) → copy URL → dán vào ô trên → Lưu.<br>5) Nhập data demo K51 B2 TT01 Hóc Môn → test cảnh báo → nhập NgayCoBang + SoBang vào Kết quả thi để test Có Bằng + Gửi Zalo.<br>6) Zalo OA: nhập ZaloOAToken vào Sheet CauHinh. Chưa có token thì web gửi ở chế độ giả lập và vẫn ghi Lịch sử + cập nhật Đã gửi.</div></div>`;
+}
+function luuCaiDat(){WEBAPP_URL=document.getElementById('inpWebApp').value.trim();localStorage.setItem('ttlx_webapp_url',WEBAPP_URL);toast('Đã lưu Web App URL');showView('dashboard')}
+async function khoiTaoSheet(){const r=await callApi('initSheets');toast(r?'Đã khởi tạo 26 nhóm sheet':'Chưa kết nối Web App — hãy deploy rồi dán URL vào Cài đặt');if(r)showView('dashboard')}
+async function backupNgay(){const r=await callApi('autoBackup');toast(r?('Đã backup: '+(r.file||'')):'Chưa kết nối Web App')}
+function moModal(idx){
+  EDIT_ROW=(idx===undefined||idx===null)?null:CURRENT_ROWS[idx];
+  const m=document.getElementById('modal'); m.classList.remove('hidden'); m.classList.add('flex');
+  document.getElementById('modalTitle').textContent=EDIT_ROW?'Sửa dòng':'Thêm mới — '+(CURRENT_SHEET||'');
+  document.getElementById('btnXoaModal').classList.toggle('hidden',!EDIT_ROW);
+  const f=document.getElementById('modalForm');
+  const optsHeSo=['B1 Số tự động','B2 Số sàn','B','C1','C','D','BE','CE','DE'];
+  const optsTT=['TT01','TT02'];
+  f.innerHTML=CURRENT_HEADERS.map(h=>{
+    const val=EDIT_ROW?EDIT_ROW[h]??'':'';
+    const isDate=h.toLowerCase().includes('ngay')||h.toLowerCase().includes('han');
+    const isNum=['SoLuongSan','PhanTramAnChia','SoHV','SoTien','TongTien','DaThu','ConLai','LuongTheoGio','LuongTheoKM','SoGioDay','SoKMDAT','TongLuong','KMHienTai','KMBaoDuongGanNhat','ChiPhiDuTinh','DaHocGio','ConLaiGio','DiemMoPhong','TongKMCan','DaChayKM','ConLaiKM','TongGioCan','DaChayGio','PhanTramHoanThanh','TienDoDAT','SoNamCoBang','SoKMAnToan','Tuoi','SoHVDangDay','GioiHan','QuangDuongKM','SoGio','DiemLyThuyet','DiemSaHinh','DiemDuongTruong','SoLuongThi','NamSX','NienHan'].includes(h);
+    let input='';
+    if(h==='HeSo'||h==='HeSoDK') input=`<input list="listHeSo" name="${h}" value="${val}" class="w-full border rounded-xl px-3 bg-white" required><datalist id="listHeSo">${optsHeSo.map(o=>`<option value="${o}">`).join('')}</datalist>`;
+    else if(h==='MaTT_SatHach') input=`<input list="listTT" name="${h}" value="${val}" class="w-full border rounded-xl px-3 bg-white"><datalist id="listTT">${optsTT.map(o=>`<option value="${o}">`).join('')}</datalist>`;
+    else if(isDate) input=`<input type="date" name="${h}" value="" class="w-full border rounded-xl px-3 bg-white" placeholder="${val}">`;
+    else if(isNum) input=`<input type="number" name="${h}" value="${val}" class="w-full border rounded-xl px-3 bg-white">`;
+    else input=`<input name="${h}" value="${val}" class="w-full border rounded-xl px-3 bg-white" ${CURRENT_HEADERS[0]===h?'required':''}>`;
+    return `<div><label class="text-sm font-bold">${h} ${CURRENT_HEADERS[0]===h?'*':''}</label>${input}${isDate&&val?`<div class="text-xs text-[#65676B]">Giá trị hiện tại: ${val}</div>`:''}</div>`;
+  }).join('');
+}
+function dongModal(){const m=document.getElementById('modal');m.classList.add('hidden');m.classList.remove('flex')}
+async function luuModal(e){
+  e.preventDefault(); const fd=new FormData(document.getElementById('modalForm')); const row={}; if(EDIT_ROW) row._row=EDIT_ROW._row;
+  CURRENT_HEADERS.forEach(h=>{let v=fd.get(h); if(v!==null&&v!==undefined&&v!=='') row[h]=v; else if(EDIT_ROW) row[h]=EDIT_ROW[h];});
+  // Validation cơ bản: mã đầu tiên không được trống
+  if(!row[CURRENT_HEADERS[0]]){toast('Thiếu '+CURRENT_HEADERS[0]);return false}
+  // Tự tính ConLaiGio cabin, ConLai DAT nếu đủ số
+  if(row.GioCabinCan&&row.DaHocGio) row.ConLaiGio=Number(row.GioCabinCan)-Number(row.DaHocGio);
+  if(row.TongKMCan&&row.DaChayKM) row.ConLaiKM=Number(row.TongKMCan)-Number(row.DaChayKM);
+  const api=await callApi('saveRow',{sheet:CURRENT_SHEET,row});
+  if(!api){toast('Chưa kết nối Web App — đã lưu demo tại chỗ (hiển thị)'); if(EDIT_ROW) Object.assign(EDIT_ROW,row); else CURRENT_ROWS.push(row); veBang(CURRENT_ROWS); dongModal(); return false}
+  toast('Đã lưu ✓'); dongModal(); showView(CURRENT_SHEET); return false;
+}
+async function xoaDong(idx){
+  const r=CURRENT_ROWS[idx]; if(!confirm('Xóa dòng này? Hành động này cần xác nhận. '+(r[CURRENT_HEADERS[0]]||''))) return;
+  const api=await callApi('deleteRow',{sheet:CURRENT_SHEET,row:r._row});
+  if(!api) CURRENT_ROWS.splice(idx,1); toast('Đã xóa'); veBang(CURRENT_ROWS); if(api) showView(CURRENT_SHEET);
+}
+function xoaModal(){if(EDIT_ROW) xoaDong(CURRENT_ROWS.indexOf(EDIT_ROW)); dongModal()}
+function inPDF(){window.print()}
+function xuatExcelHienTai(){
+  const headers=CURRENT_HEADERS.length?CURRENT_HEADERS:['MaHV','TenHV'];
+  const rows=CURRENT_ROWS.length?CURRENT_ROWS:DEMO.HocVienCoBang;
+  const csv=[headers.join(',')].concat(rows.map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(','))).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'})); a.download=(CURRENT_SHEET||'danh-sach')+'.csv'; a.click(); toast('Đã xuất Excel (CSV)');
+}
+async function guiZalo(maHV){
+  const id=maHV||(CURRENT_ROWS[0]&&CURRENT_ROWS[0].MaHV)||'HV2026-090';
+  const api=await callApi('sendZaloCoBang',{maHV:id});
+  if(api) toast('Đã gửi Zalo cho '+id+': '+(api.noiDung||'').slice(0,80));
+  else toast('Chế độ giả lập Zalo OA: Chúc mừng Anh đã có bằng! (Chưa có ZaloOAToken trong CauHinh nên chưa gửi thật, đã ghi mẫu)');
+}
+function guiZaloNhanh(){guiZalo()}
+async function capNhatCoBangUI(){
+  const ma=prompt('Nhập MaHV:'); if(!ma) return; const ngay=prompt('Nhập Ngày có bằng (dd/mm/yyyy):'); const so=prompt('Nhập Số bằng:'); if(!ngay||!so) return;
+  const api=await callApi('capNhatCoBang',{maHV:ma,ngayCoBang:ngay,soBang:so}); toast(api?'Đã cập nhật XONG - Đã có bằng + gửi Zalo':'Chưa kết nối Web App'); if(api) showView('HocVienCoBang');
+}
+// Hàm đúng tên theo spec V12.2 (alias qua showView dùng chung để không trùng code)
+function renderKhoaHoc(){return showView('KhoaHoc')}
+function renderHocVienCoBang(){return showView('HocVienCoBang')}
+// Alias showTab() theo bản HTML Sếp gửi: dashboard/trungtam/khoahoc/hocvien/cobang/giayphep/nienhan/mophong/thuchi
+function showTab(tab){const map={dashboard:'dashboard',trungtam:'TrungTamSatHach',khoahoc:'KhoaHoc',hocvien:'HocVien',cobang:'HocVienCoBang',giayphep:'GiayPhepGV',nienhan:'NienHanXe',mophong:'HocMoPhong',thuchi:'luongchiphi'};return showView(map[tab]||tab)}
+// Khởi động
+renderColorPicker(); renderMenu(); showView('dashboard');
+</script>
+</body>
+</html>
